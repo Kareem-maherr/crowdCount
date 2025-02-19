@@ -85,10 +85,21 @@ const Dashboard: React.FC = () => {
   }, []);
 
   // Add state for line chart data
-  const [lineChartData, setLineChartData] = useState<ChartData>({
+  // Add state for line chart data
+  const [lineChartData, setLineChartData] = useState({
     labels: [],
-    datasets: [{ data: [] }],
-    data: []
+    datasets: [
+      {
+        data: [],
+        color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`, // blue for in
+        strokeWidth: 2,
+      },
+      {
+        data: [],
+        color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`, // red for out
+        strokeWidth: 2,
+      }
+    ]
   });
   const [isLineChartLoading, setIsLineChartLoading] = useState(true);
 
@@ -97,47 +108,61 @@ const Dashboard: React.FC = () => {
     setIsLineChartLoading(true);
     try {
       console.log("Fetching line chart data...");
-      const response = await fetch("http://192.168.11.134:8001/api/bar-chart");
+      const response = await fetch("http://192.168.11.134:8001/stats/bar");
       const data = await response.json();
       console.log("Line Chart API Response:", data);
 
       if (Array.isArray(data)) {
-        // Transform the data into the format needed for the chart
-        const transformedData = data.map(item => ({
-          timestamp: new Date(item.timestamp),
-          count: item.count
-        }));
-
-        // Sort by timestamp and get last 10 entries
-        transformedData.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-        const lastTenEntries = transformedData.slice(-10);
+        // Sort the data by timestamp
+        data.sort((a, b) => new Date(a.bucket) - new Date(b.bucket));
 
         // Format the data for the chart
         const chartData = {
-          labels: lastTenEntries.map(item => {
-            const hour = item.timestamp.getHours();
-            return hour.toString(); // Just the hour number
+          labels: data.map(item => {
+            const date = new Date(item.bucket);
+            return date.toLocaleTimeString([], { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            });
           }),
-          datasets: [{ data: lastTenEntries.map(item => item.count) }],
-          data: lastTenEntries.map(item => item.count),
+          datasets: [
+            {
+              data: data.map(item => item.in_total),
+              color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`, // blue for in
+              strokeWidth: 2,
+            },
+            {
+              data: data.map(item => item.out_total),
+              color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`, // red for out
+              strokeWidth: 2,
+            }
+          ],
+          legend: ['In', 'Out']
         };
 
         console.log("Setting line chart data:", chartData);
         setLineChartData(chartData);
       } else {
-        console.error(
-          "Invalid data format received from API. Expected array of objects with timestamp and count",
-          {
-            expected: [{ timestamp: "ISO date string", count: "number" }],
-          }
-        );
+        console.error("Invalid data format received from API");
         console.error("Received:", data);
 
         // Set fallback data
         const fallbackData = {
-          labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-          datasets: [{ data: [20, 45, 28, 80, 99, 43, 50, 35, 70, 90] }],
-          data: [20, 45, 28, 80, 99, 43, 50, 35, 70, 90],
+          labels: ["00:00", "02:00", "04:00", "06:00", "08:00"],
+          datasets: [
+            {
+              data: [20, 45, 28, 80, 99],
+              color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+              strokeWidth: 2,
+            },
+            {
+              data: [10, 25, 18, 60, 79],
+              color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`,
+              strokeWidth: 2,
+            }
+          ],
+          legend: ['In', 'Out']
         };
         console.log("Setting fallback line chart data:", fallbackData);
         setLineChartData(fallbackData);
@@ -146,9 +171,20 @@ const Dashboard: React.FC = () => {
       console.error("Error fetching line chart data:", error);
       // Set fallback data on error
       const fallbackData = {
-        labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-        datasets: [{ data: [20, 45, 28, 80, 99, 43, 50, 35, 70, 90] }],
-        data: [20, 45, 28, 80, 99, 43, 50, 35, 70, 90],
+        labels: ["00:00", "02:00", "04:00", "06:00", "08:00"],
+        datasets: [
+          {
+            data: [20, 45, 28, 80, 99],
+            color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+            strokeWidth: 2,
+          },
+          {
+            data: [10, 25, 18, 60, 79],
+            color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`,
+            strokeWidth: 2,
+          }
+        ],
+        legend: ['In', 'Out']
       };
       console.log("Setting fallback line chart data due to error:", fallbackData);
       setLineChartData(fallbackData);
@@ -197,8 +233,8 @@ const Dashboard: React.FC = () => {
   const cardExpanded = useSharedValue(0);
   const barCardExpanded = useSharedValue(0);
 
-  const COLLAPSED_HEIGHT = 340;
-  const EXPANDED_HEIGHT = 480;
+  const COLLAPSED_HEIGHT = 400;
+  const EXPANDED_HEIGHT = 600;
 
   const cardAnimatedStyle = useAnimatedStyle(() => {
     const height = interpolate(

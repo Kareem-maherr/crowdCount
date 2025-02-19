@@ -30,7 +30,7 @@ interface LogEntry {
   id: string;
   person_name: string;
   face_image_b64: string;
-  timestamp: string;
+  event_time: string;
 }
 
 const LogsScreen = () => {
@@ -171,7 +171,7 @@ const LogsScreen = () => {
             <View style={styles.userInfo}>
               <Text style={styles.name}>{log.person_name}</Text>
               <Text style={styles.timestamp}>
-                {new Date(log.timestamp).toLocaleString()}
+                {new Date(log.event_time).toLocaleString()}
               </Text>
             </View>
             <MaterialIcons
@@ -188,13 +188,13 @@ const LogsScreen = () => {
                   <View style={styles.detailRow}>
                     <MaterialIcons name="access-time" size={20} color="#6B7280" />
                     <Text style={styles.detailText}>
-                      Time: {new Date(log.timestamp).toLocaleTimeString()}
+                      Time: {new Date(log.event_time).toLocaleTimeString()}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <MaterialIcons name="calendar-today" size={20} color="#6B7280" />
                     <Text style={styles.detailText}>
-                      Date: {new Date(log.timestamp).toLocaleDateString()}
+                      Date: {new Date(log.event_time).toLocaleDateString()}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>

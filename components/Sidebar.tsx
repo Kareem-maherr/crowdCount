@@ -22,7 +22,7 @@ import { router } from "expo-router";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  currentPage?: "dashboard" | "logs" | "analytics" | "settings" | "help" | "calendar";
+  currentPage?: "dashboard" | "logs" | "live-feed" | "settings" | "help" | "calendar";
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -38,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { icon: "dashboard", label: "Dashboard" },
     { icon: "calendar-today", label: "Calendar" },
     { icon: "history", label: "Activity Logs" },
-    { icon: "analytics", label: "Analytics" },
+    { icon: "videocam", label: "Live Feed" },
     { icon: "settings", label: "Settings" },
     { icon: "help-outline", label: "Help" },
   ];
@@ -216,22 +216,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <TouchableOpacity
             style={[
               styles.menuItem,
-              currentPage === "analytics" && styles.activeMenuItem,
+              currentPage === "live-feed" && styles.activeMenuItem,
             ]}
-            onPress={() => router.push("/analytics")}
+            onPress={() => router.push("/live-feed")}
           >
             <MaterialIcons
-              name="analytics"
+              name="videocam"
               size={24}
-              color={currentPage === "analytics" ? "#3B82F6" : "#4B5563"}
+              color={currentPage === "live-feed" ? "#3B82F6" : "#4B5563"}
             />
             <Text
               style={[
                 styles.menuItemText,
-                currentPage === "analytics" && styles.activeMenuItemText,
+                currentPage === "live-feed" && styles.activeMenuItemText,
               ]}
             >
-              Analytics
+              Live Feed
             </Text>
           </TouchableOpacity>
 
